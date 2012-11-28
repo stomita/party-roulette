@@ -6,8 +6,9 @@ $(function() {
     FB.init({
       // App ID from the App Dashboard
       appId :
-       hostname === 'localhost' ? '372274212865913' :
-       hostname === 'ferdinand.local' ? '121205298038999' : '',
+        hostname === 'localhost' ? '372274212865913' :
+        hostname === 'ferdinand.local' ? '121205298038999' : 
+        hostname === 'party-roulette.herokuapp.com' ? '337801969660288' : '',
       status     : true, // check the login status upon init?
       cookie     : true, // set sessions cookies to allow your server to access the session?
       xfbml      : true  // parse XFBML tags on this page?
