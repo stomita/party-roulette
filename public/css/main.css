@@ -1,0 +1,141 @@
+html, body {
+  width: 100%;
+  height: 100%;
+}
+body {
+  font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, Verdana, sans-serif;
+}
+.clearfix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  visibility: hidden;
+  clear: both;
+}
+.btn {
+  position: relative;
+  display: inline-block;
+  overflow: visible;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 18px;
+  color: #333;
+  text-shadow:0 1px 1px rgba(255,255,255,.5);
+  background-color: #ccc;
+  background-repeat: no-repeat;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  border-radius:4px;
+  box-shadow:0 1px 0 rgba(255,255,255,.5);
+}
+.user-icons {
+  margin: 5px auto;
+  max-width: 920px;
+}
+.user-icon {
+  float: left;
+  border-radius: 5px;
+  margin: 2px;
+  width: 75px;
+  height: 75px;
+  border: 2px solid white;
+}
+.user-icons .selected {
+  border: 2px solid blue;
+}
+.user-icon img {
+  width: 75px;
+  height: 75px;
+  border-radius: 5px;
+}
+#focused-user-win {
+  display: none;
+  margin-left: -180px;
+  margin-top: -220px;
+  position: absolute;
+  width: 360px;
+  height: 440px;
+  top: 50%;
+  left: 50%;
+  background-color: white;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+}
+#focused-user-win .image img {
+  margin: 20px 20px 5px;
+  width: 320px;
+  height: 320px;
+  border-radius: 6px;
+}
+#focused-user-win .name {
+  height: 40px;
+  font-size: 32px;
+  font-weight: bold;
+}
+#focused-user-win .buttons {
+  padding: 8px;
+}
+
+#main-ctrl {
+  position: fixed;
+  padding: 10px;
+  background-color: white;
+  width: 100%;
+  bottom: 0;
+  display: none;
+  text-align: center;
+}
+
+/**
+ * Waiting to start the roulette
+ */
+.phase-waiting #main-ctrl {
+  display: block;
+}
+
+/**
+ * Spinning roulette
+ */
+.phase-spinning .user-icon img,
+.phase-stopping .user-icon img {
+  opacity: 0.5;
+}
+.phase-spinning .user-icons .selected img,
+.phase-stopping .user-icons .selected img {
+  opacity: 1;
+}
+.phase-spinning #okBtn {
+  display: none;
+}
+.phase-spinning #focused-user-win {
+  display: block;
+}
+.phase-spinning #okBtn {
+  display: none;
+}
+/**
+ * Stopping roulette
+ */
+.phase-stopping #main-ctrl {
+  display: none;
+}
+.phase-stopping #focused-user-win {
+  display: block;
+}
+.phase-stopping #okBtn,
+.phase-stopping #stopBtn {
+  display: none;
+}
+
+/**
+ * Finished spinning
+ */
+.phase-finished #focused-user-win {
+  display: block;
+  background-color: #faa;
+}
+.phase-finished #stopBtn {
+  display: none;
+}

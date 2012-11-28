@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="stylesheet" href="./css/main.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+<script src="./jslib/underscore.js"></script>
+<script src="./js/main.js"></script>
+  </head>
+  <body>
+    <script type="x-underscore-tmpl" id="eventTmpl">
+<li>
+  <a href="javascript:void(0);" data-event-id="<%- id %>"><%- name %></a>
+</li>
+    </script>
+    <script type="x-underscore-tmpl" id="userTmpl">
+<div id="user-<%- id %>" data-user-id="<%- id %>" class="user-icon">
+  <img src="<%- picture.data.url %>" title="<%- name %>">
+</div>
+    </script>
+    <div id="fb-root"></div>
+    <fb:login-button perms="email,user_events" autologoutlink="true"></fb:login-button>
+    <ul id="events"></ul>
+    <div id="attendees" class="user-icons clearfix"></div>
+    <div id="focused-user-win">
+      <div class="image"></div>
+      <div class="name"></div>
+      <div class="buttons">
+        <button class="btn" id="stopBtn">Stop</button>
+        <button class="btn" id="okBtn">OK</button>
+      </div>
+    </div>
+    <div id="main-ctrl" class="buttons">
+      <button class="btn" id="startBtn">Start</button>
+      <button class="btn" id="shuffleBtn">Shuffle</button>
+      <button class="btn" id="addBtn">Add</button>
+    </div>
+    <audio id="papapa-audio" preload="auto">
+      <!--
+      <source src="./audio/papapa.mp3"></source>
+    -->
+      <source src="./audio/papapa.ogg"></source>
+      <source src="./audio/papapa.wav"></source>
+      <p>HTML5 Audioに対応したブラウザでご利用ください</p>
+    </audio>
+    <audio id="fanfare-audio" preload="auto">
+      <!--
+      <source src="./audio/fanfare.mp3"></source>
+    -->
+      <source src="./audio/fanfare.ogg"></source>
+      <source src="./audio/fanfare.wav"></source>
+      <p>HTML5 Audioに対応したブラウザでご利用ください</p>
+    </audio>
+  </body>
+</html>
