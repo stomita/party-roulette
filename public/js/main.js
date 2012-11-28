@@ -229,8 +229,8 @@ $(function() {
     var delay = Math.floor(Math.random() * 1000);
     setTimeout(function() {
       stopping = true;
-      var baseNum = Math.min(attendees.length, 100);
-      var num = 0.2 * baseNum + Math.floor(0.3 * Math.random() * baseNum);
+      var baseNum = 50;
+      var num = 0.4 * baseNum + Math.floor(0.6 * Math.random() * baseNum);
       stopwaits = [];
       var diff = SPINNING_LAST_INTERVAL - SPINNING_DEFAULT_INTERVAL;
       for (var i=0; i<num; i++) {
@@ -248,7 +248,6 @@ $(function() {
     stopwaits = null;
     setDisplayPhase("finished");
     fanfare.play();
-
   }
 
   function findUser(uid) {
