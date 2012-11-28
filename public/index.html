@@ -1,59 +1,119 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi">
 <meta name="format-detection" content="telephone=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="stylesheet" href="./css/main.css">
+<link href="./lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="./css/main.css" rel="stylesheet">
+<link href="./lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
-<script src="./jslib/underscore.js"></script>
+<script src="./lib/soundmanager2/js/soundmanager2-jsmin.js"></script>
+<script src="./lib/underscore.js"></script>
 <script src="./js/main.js"></script>
-  </head>
-  <body>
-    <script type="x-underscore-tmpl" id="eventTmpl">
+<script src="./lib/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <!-- Underscore Templates -->
+  <script type="x-underscore-tmpl" id="eventTmpl">
 <li>
-  <a href="javascript:void(0);" data-event-id="<%- id %>"><%- name %></a>
+<a href="javascript:void(0);" data-event-id="<%- id %>"><%- name %></a>
 </li>
-    </script>
-    <script type="x-underscore-tmpl" id="userTmpl">
+  </script>
+  <script type="x-underscore-tmpl" id="userTmpl">
 <div id="user-<%- id %>" data-user-id="<%- id %>" class="user-icon">
-  <img src="<%- picture.data.url %>" title="<%- name %>">
+<img src="<%- picture.data.url %>" title="<%- name %>">
 </div>
-    </script>
-    <div id="fb-root"></div>
-    <fb:login-button perms="email,user_events" autologoutlink="true"></fb:login-button>
+  </script>
+  <!-- Underscore Templates End -->
+
+  <div id="fb-root"></div>
+
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <a class="brand" href="#">Party Roulette</a>
+        <div class="nav-collapse collapse">
+          <ul class="nav">
+            <li id="loginMenu"><a id="loginBtn" href="#">Login</a></li>
+            <li id="logoutMenu"><a id="logoutBtn" href="#">Logout</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
     <ul id="events"></ul>
     <div id="attendees" class="user-icons clearfix"></div>
     <div id="focused-user-win">
       <div class="image"></div>
       <div class="name"></div>
       <div class="buttons">
-        <button class="btn" id="stopBtn">Stop</button>
-        <button class="btn" id="okBtn">OK</button>
+        <button class="btn btn-large" id="stopBtn">Stop</button>
+        <button class="btn btn-large" id="okBtn">OK</button>
       </div>
     </div>
-    <div id="main-ctrl" class="buttons">
-      <button class="btn" id="startBtn">Start</button>
-      <button class="btn" id="shuffleBtn">Shuffle</button>
-      <button class="btn" id="addBtn">Add</button>
-    </div>
+
     <audio id="papapa-audio" preload="auto">
-      <!--
       <source src="./audio/papapa.mp3"></source>
-    -->
       <source src="./audio/papapa.ogg"></source>
       <source src="./audio/papapa.wav"></source>
       <p>HTML5 Audioに対応したブラウザでご利用ください</p>
     </audio>
     <audio id="fanfare-audio" preload="auto">
-      <!--
       <source src="./audio/fanfare.mp3"></source>
-    -->
       <source src="./audio/fanfare.ogg"></source>
       <source src="./audio/fanfare.wav"></source>
       <p>HTML5 Audioに対応したブラウザでご利用ください</p>
     </audio>
-  </body>
+  </div>
+
+
+ 
+  <!-- Modal -->
+  <div id="addEntryDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Add New Member</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="inputName">Name</label>
+          <div class="controls">
+            <input type="text" id="inputName" placeholder="Enter Member's Name">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="inputImageUrl">Image URL</label>
+          <div class="controls">
+            <input type="text" id="inputImageUrl" placeholder="Enter Image URL (optional) ">
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button id="entrySaveBtn" class="btn btn-primary">Add</button>
+    </div>
+  </div>
+
+  <div id="main-ctrl" class="buttons navbar navbar-fixed-bottom">
+    <div class="navbar-inner">
+      <button class="btn btn-primary btn-large" id="startBtn">Start Roulette</button>
+      <button class="btn btn-large" id="shuffleBtn">Shuffle</button>
+      <a href="#addEntryDialog" role="button" class="btn btn-large" data-toggle="modal">Add Entry</a> 
+      <button class="btn btn-large" id="deleteEntryBtn">Delete Selected</a> 
+    </div>
+  </div>
+
+</body>
 </html>

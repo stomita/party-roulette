@@ -1,60 +1,122 @@
+/*global soundManager:true, FB:true, $:true, _:true */
 $(function() {
 
-   window.fbAsyncInit = function() {
-    // init the FB JS SDK
-    var hostname = location.hostname;
-    FB.init({
-      // App ID from the App Dashboard
-      appId :
-        hostname === 'localhost' ? '372274212865913' :
-        hostname === 'ferdinand.local' ? '121205298038999' : 
-        hostname === 'party-roulette.herokuapp.com' ? '337801969660288' : '',
-      status     : true, // check the login status upon init?
-      cookie     : true, // set sessions cookies to allow your server to access the session?
-      xfbml      : true  // parse XFBML tags on this page?
-    });
-
-    FB.getLoginStatus(function(response) {
-      if (response.authResponse) {
-        loadAttendingEvents();
-      }
-    });
-
-  };
-
   // templates
-  var templates = {};
-  $("script[type=x-underscore-tmpl]").each(function() {
-    var id = this.id
-    var tmpl = $(this).html();
-    templates[id] = _.template(tmpl);
-  });
+  var templates, sounds;
 
-  // event handlers
-  $("#events").on("click", "li a", function() {
-    $('#events').hide();
-    var eid = $(this).data("eventId");
-    loadEventAttendees(eid);
-  });
+  init();
 
-  $("#startBtn").click(function() {
-    setDisplayPhase("spinning")
-    startSpinning();
-  });
-  $("#stopBtn").click(function() {
-    setDisplayPhase("stopping");
-    stopSpinning();
-  });
-  $("#shuffleBtn").click(function() {
-    shuffle();
-    renderUsers("#attendees", attendees);
-  });
-  $('#okBtn').click(function() {
-    elected = null;
-    fanfare.pause();
-    try { fanfare.currentTime = 0; } catch(e) {}
-    setDisplayPhase("waiting");
-  });
+  function init() {
+    initFacebook();
+    initTemplates();
+    initSounds();
+    initDOMEventHandlers();
+  }
+
+  function initFacebook() {
+    window.fbAsyncInit = function() {
+      // init the FB JS SDK
+      var hostname = location.hostname;
+      FB.init({
+        // App ID from the App Dashboard
+        appId :
+          hostname === 'localhost' ? '372274212865913' :
+          hostname === 'ferdinand.local' ? '121205298038999' : 
+          hostname === 'party-roulette.herokuapp.com' ? '337801969660288' : '',
+        status     : true, // check the login status upon init?
+        cookie     : true, // set sessions cookies to allow your server to access the session?
+        xfbml      : true  // parse XFBML tags on this page?
+      });
+
+      var checkLoginStatus = function(response) {
+        console.log("login Status", response);
+        if (response.authResponse) {
+          setDisplayPhase("events");
+          loadAttendingEvents();
+        } else {
+          setDisplayPhase("logout");
+        }
+      };
+
+      FB.getLoginStatus(checkLoginStatus);
+      FB.Event.subscribe('auth.statusChange', checkLoginStatus);
+    };
+  }
+
+  function initSounds() {
+    sounds = {};
+    // Setup SoundManagger
+    // soundManager.setup({ url : '/lib/soundmanager2/swf/', onready : function(){} });
+  }
+
+  function initTemplates() {
+    templates = {};
+    $("script[type=x-underscore-tmpl]").each(function() {
+      var id = this.id;
+      var tmpl = $(this).html();
+      templates[id] = _.template(tmpl);
+    });
+    console.log(templates);
+  }
+
+  function initDOMEventHandlers() {
+    // event handlers
+    $('#loginBtn').click(function() {
+      FB.login(function(){}, { scope : 'email,user_events' });
+    });
+
+    $('#logoutBtn').click(function() {
+      FB.logout(function(){}, { scope : 'email,user_events' });
+    });
+
+    $("#events").on("click", "li a", function() {
+      var eid = $(this).data("eventId");
+      loadEventAttendees(eid);
+    });
+    $("#attendees").on("click", ".user-icon", function() {
+      var uid = $(this).data("userId");
+      focusUser(findUser(uid));
+    });
+    $("#startBtn").click(function() {
+      setDisplayPhase("spinning")
+      startSpinning();
+    });
+    $("#shuffleBtn").click(function() {
+      shuffle();
+      renderUsers("#attendees", attendees);
+    });
+    $("#deleteEntryBtn").click(deleteSelectedUser);
+
+    $("#stopBtn").click(function() {
+      setDisplayPhase("stopping");
+      stopSpinning();
+    });
+    $("#entrySaveBtn").click(function() {
+      var name = $('#inputName').val();
+      var imageUrl = $('#inputImageUrl').val();
+      if (!name) { return; }
+      var user = {
+        id: 'user-' + (Math.random()).toString().substring(2),
+        name : name,
+        picture: {
+          data: {
+            url: imageUrl || '/image/empty.jpg'
+          }
+        }
+      };
+      attendees.push(user);
+      var html = templates.userTmpl(user);
+      $("#attendees").append(html);
+      $('#addEntryDialog input').val('');
+      $('#addEntryDialog').modal('hide')
+    });
+    $('#okBtn').click(function() {
+      elected = null;
+      fanfare.pause();
+      try { fanfare.currentTime = 0; } catch(e) {}
+      setDisplayPhase("waiting");
+    });
+  }
 
   function setDisplayPhase(phase) {
     var body = $(document.body);
@@ -87,6 +149,7 @@ $(function() {
     });
   } 
 
+  // array of attendees
   var attendees;
 
   function loadEventAttendees(eid) {
@@ -132,20 +195,9 @@ $(function() {
     );
   }
 
-  var events = ("loadstart progress suspend abort error emptied stalled " +
-    "play pause loadedmetadata Metadata loaded loadeddata waiting playing " + 
-    "canplay canplaythrough seeking seeked timeupdate ended ratechange " +
-    "durationchange volumechange").split(/\s+/);
   var papapa = $('#papapa-audio').get(0);
-  _.forEach(events, function(evt) {
-    papapa.addEventListener(evt, function(){ console.log("papapa", evt, arguments); });
-  })
-  window.papapa = papapa;
   var fanfare = $('#fanfare-audio').get(0);
-  _.forEach(events, function(evt) {
-    fanfare.addEventListener(evt, function(){ console.log("fanfare", evt, arguments); });
-  })
-  window.fanfare = fanfare;
+
   var spinning = false;
   var stopping = false;
   var stopwaits = null;
@@ -199,6 +251,13 @@ $(function() {
 
   }
 
+  function findUser(uid) {
+    uid = String(uid);
+    return _.find(attendees, function(attendee) {
+      return attendee.id === uid;
+    });
+  }
+
   function focusUser(user) {
     $('#attendees .user-icon').removeClass("selected");
     $('#attendees #user-' + user.id).addClass("selected");
@@ -209,6 +268,17 @@ $(function() {
     papapa.pause();
     try { papapa.currentTime = 0; } catch(e) {}
     papapa.play();
+  }
+
+  function deleteSelectedUser() {
+    var userIcon = $('#attendees .selected').first();
+    if (userIcon.length>0) {
+      var uid = String(userIcon.data('userId'));
+      attendees = _.reject(attendees, function(attendee) {
+        return attendee.id === uid;
+      });
+      userIcon.remove();
+    }
   }
 
   // Load the SDK's source Asynchronously
