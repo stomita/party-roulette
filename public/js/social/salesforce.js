@@ -207,10 +207,19 @@ define([ "config" ], function(config) {
     },
 
     getGroupList: function(callback) {
-
+      sforce.connection.query("SELECT Id, Name FROM CollaborationGroup", function(res) {
+        var records = res.getArray("records");
+        records = _.map(records, function(record) {
+          return {
+            id: record.Id,
+            name: record.Name
+          };
+        });
+        callback(records);
+      });
     },
 
-    getMemberList: function(callback) {
+    getMemberList: function(gid, callback) {
 
     }
 
