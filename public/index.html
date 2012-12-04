@@ -22,15 +22,16 @@
 <div class="user-entry checked"
      data-id="<%- id %>"
      data-name="<%- name %>"
-     data-picture-url="<%- pictureUrl %>"
+     data-picture-url="<%- picture.url %>"
+     data-picture-thumbnail-url="<%- picture.thumbnailUrl %>"
  >
-<img src="<%- pictureUrl %>" title="<%- name %>">
+<img src="<%- picture.thumbnailUrl || picture.url %>" title="<%- name %>">
 <span class="name"><%- name %></span>
 </div>
   </script>
   <script type="text/x-underscore-tmpl" id="userIconTmpl">
 <div id="user-<%- id %>" data-user-id="<%- id %>" class="user-icon">
-<img src="<%- pictureUrl %>" title="<%- name %>">
+<img src="<%- picture.thumbnailUrl || picture.url %>" title="<%- name %>">
 </div>
   </script>
   <!-- Underscore Templates End -->

@@ -89,7 +89,10 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
         members.push({
           id: el.data('id'),
           name: el.data('name'),
-          pictureUrl: el.data('pictureUrl')
+          picture: {
+            url: el.data('pictureUrl'),
+            thumbnailUrl: el.data('pictureThumbnailUrl')
+          }
         });
       });
       $('#groupListDialog').modal('hide');
@@ -121,7 +124,9 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
       var user = {
         id: 'user-' + (Math.random()).toString().substring(2),
         name : name,
-        pictureUrl : imageUrl || '/image/empty.jpg'
+        picture : {
+          url : imageUrl || '/image/empty.jpg'
+        }
       };
       users.push(user);
       var html = templates.userIconTmpl(user);
@@ -168,6 +173,7 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     $('#member-list').empty();
     social.getMemberList(gid, function(members) {
       _.forEach(members, function(member) {
+        console.log(member);
         var html = templates.userEntryTmpl(member);
         $('#member-list').append(html);
       });
@@ -201,8 +207,12 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     };
     _.forEach(users, function(user) {
       var img = new Image();
-      img.src = user.pictureUrl;
-      img.onload = countdown;
+      img.src = user.picture.url;
+      img.onload = function() {
+        user.picture.width = img.width;
+        user.picture.height = img.height;
+        countdown();
+      };
     });
   }
 
@@ -289,7 +299,7 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     $('#user-icons #user-' + user.id).addClass("selected");
     $('#focused-user-win .image')
        .empty()
-       .append($('<img>').attr('src', user.pictureUrl));
+       .append($('<img>').attr('src', user.picture.url));
     $('#focused-user-win .name').text(user.name);
     papapa.pause();
     try { papapa.currentTime = 0; } catch(e) {}

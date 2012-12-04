@@ -84,7 +84,9 @@ define([ "config" ], function(config) {
           return {
             id: "fb-" + member.id,
             name: member.name,
-            pictureUrl: member.picture.data.url,
+            picture: {
+              url: member.picture.data.url
+            },
             provider: "facebook"
           };
         });

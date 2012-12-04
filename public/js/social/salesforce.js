@@ -237,16 +237,20 @@ define([ "config" ], function(config) {
         if (res.getInt("size") === 0) { return callback([]); }
         var ids = _.map(res.getArray("records"), function(r){ return r.MemberId; });
         var userSOQL = 
-          "SELECT Id, Name, SmallPhotoUrl " +
+          "SELECT Id, Name, SmallPhotoUrl, FullPhotoUrl " +
           "FROM User " +
           "WHERE Id IN ('" + ids.join("','") + "')";
         sforce.connection.query(userSOQL, function(res) {
           var records = res.getArray("records");
           records = _.map(records, function(r) {
             return {
-              id : r.Id,
+              id : "sf-"+r.Id,
               name : r.Name,
-              pictureUrl : r.SmallPhotoUrl
+              picture : {
+                url : r.FullPhotoUrl,
+                thumnailUrl: r.SmallPhotoUrl
+              },
+              provider: "salesforce"
             };
           });
           callback(records);
