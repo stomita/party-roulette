@@ -4,7 +4,7 @@
  */
 define([ "config" ], function(config) {
 
-  var locale = "en_US";
+  var userInfo = null;
 
   return {
     name: "Facebook",
@@ -37,7 +37,7 @@ define([ "config" ], function(config) {
     isLoggedIn: function(callback) {
       FB.getLoginStatus(function(response) {
         if (response.authResponse) {
-          FB.api("me", function(res) { locale = res.locael; });
+          FB.api("me", function(res) { userInfo = res; });
           callback(true);
         } else {
           callback(false);
@@ -45,10 +45,14 @@ define([ "config" ], function(config) {
       });
     },
 
+    getUserInfo: function() {
+      return userInfo;
+    },
+
     authorize: function(callback) {
       FB.login(function(response){
         if (response.authResponse) {
-          FB.api("me", function(res) { locale = res.locael; });
+          FB.api("me", function(res) { userInfo = res });
           callback(true);
         } else {
           callback(false);
@@ -57,6 +61,7 @@ define([ "config" ], function(config) {
     },
 
     logout: function(callback) {
+      userInfo = null;
       FB.logout(callback || function(){});
     },
 
@@ -64,7 +69,7 @@ define([ "config" ], function(config) {
       var url = "me/events";
       url += "?fields=name,id";
       url += "&type=attending";
-      url += "&locale=" + locale;
+      url += "&locale=" + userInfo.locale;
       FB.api(url, function(response) {
         callback(response.data);
       });
@@ -73,7 +78,7 @@ define([ "config" ], function(config) {
     getMemberList: function(gid, callback) {
       var url = gid;
       url += "?fields=attending.fields(id,name,picture.width(320).height(320).type(large),gender)";
-      url += "&locale=" + locale;
+      url += "&locale=" + userInfo.locale;
       FB.api(url, function(response) {
         var members = _.map(response.attending.data, function(member) {
           return {

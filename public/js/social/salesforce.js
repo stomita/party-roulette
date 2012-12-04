@@ -140,6 +140,7 @@ define([ "config" ], function(config) {
 
   var version = '26.0';
   var authzUrl = 'https://login.salesforce.com/services/oauth2/authorize';
+  var userInfo = null;
 
   return {
     name: "Salesforce",
@@ -160,10 +161,17 @@ define([ "config" ], function(config) {
         sforce.connection.sessionId = accessToken;
         sforce.connection.serverUrl = instanceUrl + "/services/Soap/u/"+version;
         sforce.connection.getUserInfo({
-          onSuccess: function(res) { callback(true); },
+          onSuccess: function(res) {
+            userInfo = res;
+            callback(true);
+          },
           onFailure: function(res) { callback(false); }
         });
       }
+    },
+
+    getUserInfo: function() {
+      return userInfo;
     },
 
     authorize: function(callback) {
@@ -201,6 +209,7 @@ define([ "config" ], function(config) {
     },
 
     logout: function(callback) {
+      userInfo = null;
       saveValue("sf_access_token", "");
       saveValue("sf_instance_url", "");
       callback();
@@ -220,7 +229,29 @@ define([ "config" ], function(config) {
     },
 
     getMemberList: function(gid, callback) {
-
+      var memberSOQL =
+        "SELECT Id, MemberId "+
+        "FROM CollaborationGroupMember "+
+        "WHERE CollaborationGroupId = '"+gid+"'";
+      sforce.connection.query(memberSOQL, function(res) {
+        if (res.getInt("size") === 0) { return callback([]); }
+        var ids = _.map(res.getArray("records"), function(r){ return r.MemberId; });
+        var userSOQL = 
+          "SELECT Id, Name, SmallPhotoUrl " +
+          "FROM User " +
+          "WHERE Id IN ('" + ids.join("','") + "')";
+        sforce.connection.query(userSOQL, function(res) {
+          var records = res.getArray("records");
+          records = _.map(records, function(r) {
+            return {
+              id : r.Id,
+              name : r.Name,
+              pictureUrl : r.SmallPhotoUrl
+            };
+          });
+          callback(records);
+        });
+      });
     }
 
   };

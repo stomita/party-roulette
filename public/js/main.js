@@ -47,9 +47,13 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
             });
           } else {
             li.find('a').click(function() {
-              social.authorize(function() {
+              if (social.getUserInfo()) {
                 showGroupList(social);
-              });
+              } else {
+                social.authorize(function() {
+                  showGroupList(social);
+                });
+              }
             });
           }
         });
