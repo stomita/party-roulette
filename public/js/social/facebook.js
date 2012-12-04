@@ -82,12 +82,15 @@ define([ "config" ], function(config) {
       FB.api(url, function(response) {
         var members = _.map(response.attending.data, function(member) {
           return {
+            provider: "facebook",
             id: "fb-" + member.id,
             name: member.name,
             picture: {
               url: member.picture.data.url
             },
-            provider: "facebook"
+            thumbnail: {
+              url: member.picture.data.url
+            }
           };
         });
         callback(members);

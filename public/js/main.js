@@ -90,8 +90,10 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
           id: el.data('id'),
           name: el.data('name'),
           picture: {
-            url: el.data('pictureUrl'),
-            thumbnailUrl: el.data('pictureThumbnailUrl')
+            url: el.data('pictureUrl')
+          },
+          thumbnail: {
+            url: el.data('thumbnailUrl')
           }
         });
       });
@@ -130,7 +132,9 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
       };
       users.push(user);
       var html = templates.userIconTmpl(user);
-      $("#user-icons").append(html);
+      var entry = $(html);
+      $("#user-icons").append(entry);
+      fitImage(entry.find("img"), user.picture);
       $('#addEntryDialog input').val('');
       $('#addEntryDialog').modal('hide');
     });
@@ -173,9 +177,10 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     $('#member-list').empty();
     social.getMemberList(gid, function(members) {
       _.forEach(members, function(member) {
-        console.log(member);
         var html = templates.userEntryTmpl(member);
-        $('#member-list').append(html);
+        var entry = $(html);
+        fitImage(entry.find("img"), member.thumbnail);
+        $('#member-list').append(entry);
       });
     });
   }
@@ -220,7 +225,9 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     $(el).empty();
     _.forEach(users, function(user) {
       var html = templates.userIconTmpl(user);
-      $(el).append(html);
+      var entry = $(html);
+      $(el).append(entry);
+      fitImage(entry.find("img"), user.thumbnail);
     });
   }
 
@@ -297,9 +304,8 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
   function focusUser(user) {
     $('#user-icons .user-icon').removeClass("selected");
     $('#user-icons #user-' + user.id).addClass("selected");
-    $('#focused-user-win .image')
-       .empty()
-       .append($('<img>').attr('src', user.picture.url));
+    $('#focused-user-win .image').html('<img src="./image/s.gif" >');
+    fitImage($('#focused-user-win .image img'), user.picture);
     $('#focused-user-win .name').text(user.name);
     papapa.pause();
     try { papapa.currentTime = 0; } catch(e) {}
@@ -315,6 +321,28 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
       });
       userIcon.remove();
     }
+  }
+
+  function fitImage(el, image) {
+    if (!image.width || !image.height) {
+      var img = new Image();
+      img.src = image.url;
+      img.onload = function() {
+        image.width = img.width;
+        image.height = img.height;
+        fitImage(el, image);
+      };
+      return;
+    }
+    var ew = el.width(), eh = el.height();
+    var iw = image.width, ih = image.height;
+    var r = iw * eh > ih * ew ? eh / ih : ew / iw;
+    var rw = iw * r, rh = ih * r;
+    el.css({
+      "background-image" : "url(" + image.url + ")",
+      "background-size" : rw + "px " + rh + "px",
+      "background-position" : (ew - rw) + "px " + (eh - rh) + "px"
+    });
   }
 
 

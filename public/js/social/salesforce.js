@@ -244,13 +244,15 @@ define([ "config" ], function(config) {
           var records = res.getArray("records");
           records = _.map(records, function(r) {
             return {
-              id : "sf-"+r.Id,
-              name : r.Name,
-              picture : {
-                url : r.FullPhotoUrl,
-                thumnailUrl: r.SmallPhotoUrl
+              provider: "salesforce",
+              id: "sf-"+r.Id,
+              name: r.Name,
+              picture: {
+                url : r.FullPhotoUrl
               },
-              provider: "salesforce"
+              thumbnail: {
+                url: r.SmallPhotoUrl
+              }
             };
           });
           callback(records);

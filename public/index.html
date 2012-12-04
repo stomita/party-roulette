@@ -23,15 +23,15 @@
      data-id="<%- id %>"
      data-name="<%- name %>"
      data-picture-url="<%- picture.url %>"
-     data-picture-thumbnail-url="<%- picture.thumbnailUrl %>"
+     data-thumbnail-url="<%- thumbnail.url %>"
  >
-<img src="<%- picture.thumbnailUrl || picture.url %>" title="<%- name %>">
+<img src="./image/s.gif" title="<%- name %>">
 <span class="name"><%- name %></span>
 </div>
   </script>
   <script type="text/x-underscore-tmpl" id="userIconTmpl">
 <div id="user-<%- id %>" data-user-id="<%- id %>" class="user-icon">
-<img src="<%- picture.thumbnailUrl || picture.url %>" title="<%- name %>">
+<img src="./image/s.gif" title="<%- name %>">
 </div>
   </script>
   <!-- Underscore Templates End -->
