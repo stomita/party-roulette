@@ -7,7 +7,7 @@ define(function() {
     facebook: {
       appId : 
         hostname === 'localhost' ? '372274212865913' :
-        hostname === 'party-roulette.herokuapp.com' ? '337801969660288' : '',
+        hostname === 'party-roulette.herokuapp.com' ? '337801969660288' : ''
     },
     salesforce: {
       clientId : 
@@ -17,8 +17,8 @@ define(function() {
           '3MVG9rFJvQRVOvk4hLXJcsIs0xc4oeZyTfGx5NSax9TQes.XerrWVpjpo2rsVdD8_UDu1VM.bd5BYus5SHVs0' :
         '',
       redirectUri :
-        hostname === 'localhost' ? 'http://localhost:7000' :
-        hostname === 'party-roulette.herokuapp.com' ?  'https://party-roulette.herokuapp.com' :
+        hostname === 'localhost' ? 'http://localhost:7000/' :
+        hostname === 'party-roulette.herokuapp.com' ?  'https://party-roulette.herokuapp.com/' :
         ''
     }
   };
