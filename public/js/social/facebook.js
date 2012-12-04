@@ -46,7 +46,14 @@ define([ "config" ], function(config) {
     },
 
     authorize: function(callback) {
-      FB.login(callback || function(){}, { scope : 'email,user_events' });
+      FB.login(function(response){
+        if (response.authResponse) {
+          FB.api("me", function(res) { locale = res.locael; });
+          callback(true);
+        } else {
+          callback(false);
+        }
+      }, { scope : 'email,user_events' });
     },
 
     logout: function(callback) {

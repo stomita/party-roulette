@@ -1,4 +1,4 @@
-/*global sforce:true, localStorage:true */
+/*global sforce:true, localStorage:true, _:true */
 /**
  * salesforce.js
  */
@@ -166,13 +166,44 @@ define([ "config" ], function(config) {
       }
     },
 
-    authorize: function() {
+    authorize: function(callback) {
       var url = authzUrl;
       url += "?response_type=token";
       url += "&client_id=" + config.salesforce.clientId;
       url += "&redirect_uri=" + encodeURIComponent(config.salesforce.redirectUri);
-      url += "display=popup";
-      window.open(url, null, 'width=800,height=600');
+      url += "&display=popup";
+      var left = (window.screen.width - 800) * 0.5;
+      var top = (window.screen.height - 600) * 0.5;
+      var w = window.open(url, null, 'width=800,height=600,top='+top+',left='+left);
+      var pid = setInterval(function() {
+        if (w.closed) {
+          clearTimeout(pid);
+          callback(false);
+        }
+        try {
+          var hash = w.location.href.split('#')[1];
+          var params = {};
+          _.forEach(hash.split('&'), function(pair) {
+            pair = pair.split('=');
+            params[pair[0]] = decodeURIComponent(pair[1]);
+          });
+          if (params.access_token && params.instance_url) {
+            saveValue("sf_access_token", params.access_token);
+            saveValue("sf_instance_url", params.instance_url);
+            sforce.connection.sessionId = params.access_token;
+            sforce.connection.serverUrl = params.instance_url + "/services/Soap/u/"+version;
+            w.close();
+            clearInterval(pid);
+            callback(true);
+          }
+        } catch(e) {}
+      }, 100);
+    },
+
+    logout: function(callback) {
+      saveValue("sf_access_token", "");
+      saveValue("sf_instance_url", "");
+      callback();
     },
 
     getGroupList: function(callback) {
