@@ -40,20 +40,13 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
         $('<a href="#" />').text(social.name)
       ).appendTo($('#importMenu'));
       social.init(function() {
-        social.isLoggedIn(function(loggedIn) {
-          if (loggedIn) {
-            li.find('a').click(function() {
-              showGroupList(social);
-            });
+        social.isLoggedIn(function(loggedIn) {});
+        li.find('a').click(function() {
+          if (social.getUserInfo()) {
+            showGroupList(social);
           } else {
-            li.find('a').click(function() {
-              if (social.getUserInfo()) {
-                showGroupList(social);
-              } else {
-                social.authorize(function() {
-                  showGroupList(social);
-                });
-              }
+            social.authorize(function(loggedIn) {
+              if (loggedIn) { showGroupList(social); } 
             });
           }
         });
@@ -66,6 +59,12 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
       var gid = $(this).val();
       var social = findSocial($(this).data('social-name'));
       showMemberList(social, gid);
+    });
+    $('#signOutLink').click(function() {
+      var social = findSocial($(this).data('social-name'));
+      social.logout(function() {
+        $('#groupListDialog').modal('hide');
+      });
     });
     $('#member-list').on('click', '.user-entry', function() {
       var checkbox = $(this).find('input[type=checkbox]');
@@ -163,13 +162,17 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     $('#groupListDialog').modal('show');
     $('#member-list').empty();
     $('#groups').html('<option></option>')
-                .data('social-name', social.name);
+                .data('social-name', social.name)
+                .attr('disabled', 'disabled');
+    $('#signOutLink').data('social-name', social.name);
+    $('#memberImportBtn').attr("disabled", "disabled");
     social.getGroupList(function(groups) {
       _.forEach(groups, function(group) {
         $('#groups').append(
           $('<option>').val(group.id).text(group.name)
         );
       });
+      $('#groups').removeAttr('disabled');
     });
   }
 
@@ -182,6 +185,7 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
         fitImage(entry.find("img"), member.thumbnail);
         $('#member-list').append(entry);
       });
+      $('#memberImportBtn').removeAttr("disabled");
     });
   }
 
@@ -250,6 +254,7 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
   var SPINNING_LAST_INTERVAL = 2000;
 
   function startSpinning() {
+    window.scrollTo(0, 0);
     shuffle();
     var i=0, len=users.length, nominated;
     var next = function() {

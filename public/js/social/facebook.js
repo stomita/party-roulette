@@ -37,8 +37,10 @@ define([ "config" ], function(config) {
     isLoggedIn: function(callback) {
       FB.getLoginStatus(function(response) {
         if (response.authResponse) {
-          FB.api("me", function(res) { userInfo = res; });
-          callback(true);
+          FB.api("me", function(res) {
+            userInfo = res; 
+            callback(true);
+          });
         } else {
           callback(false);
         }
