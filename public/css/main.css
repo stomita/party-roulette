@@ -3,12 +3,29 @@ body {
   padding-bottom: 60px;
 }
 
-#loginMenu {
-  display: none;
+/**
+ *
+ */
+.user-list .checked {
+  background-color: #eef;
 }
-#events {
-  display: none;
+.user-list .checked .name {
+  font-weight: bold;
 }
+.user-entry {
+  width: 100%;
+  height: 40px;
+  border-bottom: 1px dotted gray;
+  cursor: pointer;
+}
+.user-entry img {
+  width: 40px;
+  height: 40px;
+}
+
+/**
+ *
+ */
 .user-icons {
   margin: 5px auto;
   max-width: 920px;
@@ -70,24 +87,9 @@ body {
 }
 
 /**
- * Before FB authentication
+ * Top
  */
-.phase-logout #events,
-.phase-logout #logoutMenu,
-.phase-logout #attendees {
-  display: none;
-}
-.phase-logout #loginMenu {
-  display: block;
-}
-
-/**
- * Showing events
- */
-.phase-events #events {
-  display: block;
-}
-.phase-events #attendees {
+.phase-top #users {
   display: none;
 }
 

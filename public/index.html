@@ -13,21 +13,24 @@
 <script src="./lib/soundmanager2/js/soundmanager2-jsmin.js"></script>
 <script src="./lib/underscore.js"></script>
 <script src="./lib/flXHR/flXHR.js"></script>
-<script src="//login.salesforce.com/soap/ajax/26.0/connection.js"></script>
-<script src="./js/sforce-flxhr-override.js"></script>
-<script src="./js/main.js"></script>
+<script src="./lib/require.js" data-main="./js/main.js"></script>
 <script src="./lib/bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body>
   <!-- Underscore Templates -->
-  <script type="x-underscore-tmpl" id="eventTmpl">
-<li>
-<a href="javascript:void(0);" data-event-id="<%- id %>"><%- name %></a>
-</li>
+  <script type="text/x-underscore-tmpl" id="userEntryTmpl">
+<div class="user-entry checked"
+     data-id="<%- id %>"
+     data-name="<%- name %>"
+     data-picture-url="<%- pictureUrl %>"
+ >
+<img src="<%- pictureUrl %>" title="<%- name %>">
+<span class="name"><%- name %></span>
+</div>
   </script>
-  <script type="x-underscore-tmpl" id="userTmpl">
+  <script type="text/x-underscore-tmpl" id="userIconTmpl">
 <div id="user-<%- id %>" data-user-id="<%- id %>" class="user-icon">
-<img src="<%- picture.data.url %>" title="<%- name %>">
+<img src="<%- pictureUrl %>" title="<%- name %>">
 </div>
   </script>
   <!-- Underscore Templates End -->
@@ -43,19 +46,22 @@
           <span class="icon-bar"></span>
         </a>
         <a class="brand" href="#">Party Roulette</a>
-        <div class="nav-collapse collapse">
-          <ul class="nav">
-            <li id="loginMenu"><a id="loginBtn" href="#">Login</a></li>
-            <li id="logoutMenu"><a id="logoutBtn" href="#">Logout</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
+        <ul class="nav-collapse nav">
+          <li class="dropdown">
+            <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+              Import
+              <b class="caret"></b>
+            </a>
+            <ul id="importMenu" class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+            </ul>
+          </li>
+        </ul><!--/.nav-collapse -->
       </div>
     </div>
   </div>
 
   <div class="container">
-    <ul id="events"></ul>
-    <div id="attendees" class="user-icons clearfix"></div>
+    <div id="user-icons" class="user-icons clearfix"></div>
     <div id="focused-user-win">
       <div class="image"></div>
       <div class="name"></div>
@@ -69,20 +75,42 @@
       <source src="./audio/papapa.mp3"></source>
       <source src="./audio/papapa.ogg"></source>
       <source src="./audio/papapa.wav"></source>
-      <p>HTML5 Audioに対応したブラウザでご利用ください</p>
     </audio>
     <audio id="fanfare-audio" preload="auto">
       <source src="./audio/fanfare.mp3"></source>
       <source src="./audio/fanfare.ogg"></source>
       <source src="./audio/fanfare.wav"></source>
-      <p>HTML5 Audioに対応したブラウザでご利用ください</p>
     </audio>
   </div>
 
 
  
-  <!-- Modal -->
-  <div id="addEntryDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <!-- Group Member Selection Dialog -->
+  <div id="groupListDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Select Members to Import</h3>
+    </div>
+    <div class="modal-body">
+      <div>
+        <select id="groups"></select>
+      </div>
+      <div>
+        <a href="#" id="memberSelectAllLink">Select All</a>
+        <a href="#" id="memberUnselectAllLink">Unselect All</a>
+      </div>
+      <div id="member-list" class="user-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn">Logout</button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button id="memberImportBtn" class="btn btn-primary">Import</button>
+    </div>
+  </div>
+
+  
+  <!-- Add Member Entry Dialog -->
+  <div id="addEntryDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
       <h3 id="myModalLabel">Add New Member</h3>

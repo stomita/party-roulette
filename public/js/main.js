@@ -1,46 +1,22 @@
 /*global soundManager:true, FB:true, $:true, _:true */
-$(function() {
+
+// force https
+if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+  location.protocol = 'https:';
+}
+
+require([ "social/facebook", "social/salesforce" ], function(facebook, salesforce) {
 
   // templates
-  var templates, sounds;
+  var templates, sounds, socials = [ facebook, salesforce ];
 
   init();
 
   function init() {
-    initFacebook();
     initTemplates();
     initSounds();
+    initMenu();
     initDOMEventHandlers();
-  }
-
-  function initFacebook() {
-    window.fbAsyncInit = function() {
-      // init the FB JS SDK
-      var hostname = location.hostname;
-      FB.init({
-        // App ID from the App Dashboard
-        appId :
-          hostname === 'localhost' ? '372274212865913' :
-          hostname === 'ferdinand.local' ? '121205298038999' : 
-          hostname === 'party-roulette.herokuapp.com' ? '337801969660288' : '',
-        status     : true, // check the login status upon init?
-        cookie     : true, // set sessions cookies to allow your server to access the session?
-        xfbml      : true  // parse XFBML tags on this page?
-      });
-
-      var checkLoginStatus = function(response) {
-        console.log("login Status", response);
-        if (response.authResponse) {
-          setDisplayPhase("events");
-          loadAttendingEvents();
-        } else {
-          setDisplayPhase("logout");
-        }
-      };
-
-      FB.getLoginStatus(checkLoginStatus);
-      FB.Event.subscribe('auth.statusChange', checkLoginStatus);
-    };
   }
 
   function initSounds() {
@@ -51,39 +27,82 @@ $(function() {
 
   function initTemplates() {
     templates = {};
-    $("script[type=x-underscore-tmpl]").each(function() {
+    $('script[type="text/x-underscore-tmpl"]').each(function() {
       var id = this.id;
       var tmpl = $(this).html();
       templates[id] = _.template(tmpl);
     });
-    console.log(templates);
+  }
+
+  function initMenu() {
+    _.forEach(socials, function(social) {
+      var li = $('<li />').append(
+        $('<a href="#" />').text(social.name)
+      ).appendTo($('#importMenu'));
+      social.init(function() {
+        social.isLoggedIn(function(loggedIn) {
+          if (loggedIn) {
+            li.find('a').click(function() {
+              showGroupList(social);
+            });
+          } else {
+            li.find('a').click(function() {
+              social.authorize(function() {
+                showGroupList(social);
+              });
+            });
+          }
+        });
+      });
+    });
   }
 
   function initDOMEventHandlers() {
-    // event handlers
-    $('#loginBtn').click(function() {
-      FB.login(function(){}, { scope : 'email,user_events' });
+    $("#groups").change(function() {
+      var gid = $(this).val();
+      var social = findSocial($(this).data('social-name'));
+      showMemberList(social, gid);
+    });
+    $('#member-list').on('click', '.user-entry', function() {
+      var checkbox = $(this).find('input[type=checkbox]');
+      if (checkbox.is(':checked')) {
+        checkbox.removeAttr('checked');
+      } else {
+        checkbox.attr('checked', 'checked');
+      }
+      $(this).toggleClass('checked');
+    });
+    $('#memberSelectAllLink').click(function() {
+      $('#member-list .user-entry').addClass('checked');
+    });
+    $('#memberUnselectAllLink').click(function() {
+      $('#member-list .user-entry').removeClass('checked');
+    });
+    $('#memberImportBtn').click(function() {
+      var members = [];
+      $('#member-list .user-entry.checked').each(function() {
+        var el = $(this);
+        members.push({
+          id: el.data('id'),
+          name: el.data('name'),
+          pictureUrl: el.data('pictureUrl')
+        });
+      });
+      $('#groupListDialog').modal('hide');
+      addMembers(members);
     });
 
-    $('#logoutBtn').click(function() {
-      FB.logout(function(){}, { scope : 'email,user_events' });
-    });
-
-    $("#events").on("click", "li a", function() {
-      var eid = $(this).data("eventId");
-      loadEventAttendees(eid);
-    });
-    $("#attendees").on("click", ".user-icon", function() {
+    $("#user-icons").on("click", ".user-icon", function() {
       var uid = $(this).data("userId");
       focusUser(findUser(uid));
     });
     $("#startBtn").click(function() {
-      setDisplayPhase("spinning")
+      setDisplayPhase("spinning");
       startSpinning();
     });
     $("#shuffleBtn").click(function() {
       shuffle();
-      renderUsers("#attendees", attendees);
+      renderUsers("#user-icons", users);
     });
     $("#deleteEntryBtn").click(deleteSelectedUser);
 
@@ -98,17 +117,13 @@ $(function() {
       var user = {
         id: 'user-' + (Math.random()).toString().substring(2),
         name : name,
-        picture: {
-          data: {
-            url: imageUrl || '/image/empty.jpg'
-          }
-        }
+        pictureUrl : imageUrl || '/image/empty.jpg'
       };
-      attendees.push(user);
-      var html = templates.userTmpl(user);
-      $("#attendees").append(html);
+      users.push(user);
+      var html = templates.userIconTmpl(user);
+      $("#user-icons").append(html);
       $('#addEntryDialog input').val('');
-      $('#addEntryDialog').modal('hide')
+      $('#addEntryDialog').modal('hide');
     });
     $('#okBtn').click(function() {
       elected = null;
@@ -116,6 +131,10 @@ $(function() {
       try { fanfare.currentTime = 0; } catch(e) {}
       setDisplayPhase("waiting");
     });
+  }
+
+  function findSocial(name) {
+    return _.find(socials, function(social){ return social.name === name; });
   }
 
   function setDisplayPhase(phase) {
@@ -127,41 +146,45 @@ $(function() {
     body.addClass("phase-" + phase);
   }
 
-  function showLoading() {
-  }
-
-  function hideLoading() {
-  }
-
-  function loadAttendingEvents() {
-    showLoading();
-    FB.api("me/events?fields=name,id,description,location&type=attending&locale=ja_JP", function(response) {
-      hideLoading();
-      renderEvents("#events", response.data);
-    });
-  }
-
-  function renderEvents(el, events) {
-    $(el).empty();
-    _.forEach(events, function(event) {
-      var html = templates.eventTmpl(event);
-      $(el).append(html);
-    });
-  } 
-
-  // array of attendees
-  var attendees;
-
-  function loadEventAttendees(eid) {
-    showLoading();
-    FB.api(eid + "?fields=attending.fields(id,name,picture.width(320).height(320).type(large),gender)&locale=ja_JP", function(response) {
-      attendees = response.attending.data;
-      preloadUserPhotos(attendees, function() {
-        hideLoading();
-        shuffle();
-        renderUsers("#attendees", attendees);
-        setDisplayPhase("waiting");
+  function showGroupList(social) {
+    $('#groupListDialog').modal('show');
+    $('#member-list').empty();
+    $('#groups').html('<option></option>')
+                .data('social-name', social.name);
+    social.getGroupList(function(groups) {
+      _.forEach(groups, function(group) {
+        $('#groups').append(
+          $('<option>').val(group.id).text(group.name)
+        );
       });
+    });
+  }
+
+  function showMemberList(social, gid) {
+    $('#member-list').empty();
+    social.getMemberList(gid, function(members) {
+      _.forEach(members, function(member) {
+        var html = templates.userEntryTmpl(member);
+        $('#member-list').append(html);
+      });
+    });
+  }
+
+  // array of users
+  var users = [];
+
+  function addMembers(members) {
+    users = users.concat(members);
+    var ids = {};
+    users = _.filter(users, function(user) {
+      if (ids[user.id]) { return false; }
+      ids[user.id] = true;
+      return true;
+    });
+    preloadUserPhotos(users, function() {
+      shuffle();
+      renderUsers("#user-icons", users);
+      setDisplayPhase("waiting");
     });
   }
 
@@ -174,7 +197,7 @@ $(function() {
     };
     _.forEach(users, function(user) {
       var img = new Image();
-      img.src = user.picture.data.url;
+      img.src = user.pictureUrl;
       img.onload = countdown;
     });
   }
@@ -182,14 +205,14 @@ $(function() {
   function renderUsers(el, users) {
     $(el).empty();
     _.forEach(users, function(user) {
-      var html = templates.userTmpl(user);
+      var html = templates.userIconTmpl(user);
       $(el).append(html);
     });
   }
 
   function shuffle() {
-    attendees = _.map(
-      _.map(attendees, function(a) { return [ Math.random(), a ]; })
+    users = _.map(
+      _.map(users, function(a) { return [ Math.random(), a ]; })
        .sort(function(a1, a2) { return a1[0] > a2[0] ? 1 : -1; }),
       function(a) { return a[1]; }
     );
@@ -207,13 +230,13 @@ $(function() {
 
   function startSpinning() {
     shuffle();
-    var i=0, len=attendees.length, nominated;
+    var i=0, len=users.length, nominated;
     var next = function() {
       if (stopwaits && stopwaits.length === 0) {
         finishSpinning(nominated);
         return;
       }
-      nominated = attendees[i];
+      nominated = users[i];
       focusUser(nominated);
       var interval = stopping ? stopwaits.shift() : SPINNING_DEFAULT_INTERVAL;
       if (spinning) {
@@ -252,17 +275,17 @@ $(function() {
 
   function findUser(uid) {
     uid = String(uid);
-    return _.find(attendees, function(attendee) {
+    return _.find(users, function(attendee) {
       return attendee.id === uid;
     });
   }
 
   function focusUser(user) {
-    $('#attendees .user-icon').removeClass("selected");
-    $('#attendees #user-' + user.id).addClass("selected");
+    $('#user-icons .user-icon').removeClass("selected");
+    $('#user-icons #user-' + user.id).addClass("selected");
     $('#focused-user-win .image')
        .empty()
-       .append($('<img>').attr('src', user.picture.data.url));
+       .append($('<img>').attr('src', user.pictureUrl));
     $('#focused-user-win .name').text(user.name);
     papapa.pause();
     try { papapa.currentTime = 0; } catch(e) {}
@@ -270,27 +293,15 @@ $(function() {
   }
 
   function deleteSelectedUser() {
-    var userIcon = $('#attendees .selected').first();
+    var userIcon = $('#user-icons .selected').first();
     if (userIcon.length>0) {
       var uid = String(userIcon.data('userId'));
-      attendees = _.reject(attendees, function(attendee) {
+      users = _.reject(users, function(attendee) {
         return attendee.id === uid;
       });
       userIcon.remove();
     }
   }
-
-  // Load the SDK's source Asynchronously
-  // Note that the debug version is being actively developed and might 
-  // contain some type checks that are overly strict. 
-  // Please report such bugs using the bugs tool.
-  (function(d, debug){
-     var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement('script'); js.id = id; js.async = true;
-     js.src = "//connect.facebook.net/en_US/all" + (debug ? "/debug" : "") + ".js";
-     ref.parentNode.insertBefore(js, ref);
-  }(document, /*debug*/ false));
 
 
 });

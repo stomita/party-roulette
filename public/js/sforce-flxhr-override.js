@@ -2,7 +2,7 @@
 /**
  * sforce-flxhr-override.js
  */
-(function() {
+function overrideTransport() {
 
   var requestQueue = {};
   var requestSeq = 1;
