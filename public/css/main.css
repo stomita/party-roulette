@@ -2,6 +2,48 @@ body {
   padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
   padding-bottom: 60px;
 }
+/**
+ *
+ */
+#global-menu {
+  display: none;
+}
+
+/**
+ *
+ */
+#top-message {
+  display: none;
+}
+#top-message .image {
+  float: left;
+  width: 450px;
+}
+#top-message .text {
+  margin-left: 500px;
+}
+
+/**
+ *
+ */
+#socials .btn {
+  margin: 5px;
+  padding: 0;
+  width: 140px;
+  height: 140px;
+  line-height: 240px;
+  background-image: url(../image/empty.jpg);
+  background-repeat: no-repeat;
+  background-position: center 20px;
+  background-size: 90px 90px;
+}
+
+/**
+ *
+ */
+.loader {
+  display: none;
+}
 
 /**
  *
@@ -47,7 +89,7 @@ body {
   height: 75px;
   border-radius: 5px;
 }
-#focused-user-win {
+#nomination-win {
   display: none;
   margin-left: -180px;
   margin-top: -230px;
@@ -62,13 +104,13 @@ body {
   border-radius: 12px;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
 }
-#focused-user-win .image img {
+#nomination-win .image img {
   margin: 20px 20px 5px;
   width: 320px;
   height: 320px;
   border-radius: 6px;
 }
-#focused-user-win .name {
+#nomination-win .name {
   height: 40px;
   line-height: 40px;
   font-size: 32px;
@@ -77,7 +119,7 @@ body {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-#focused-user-win .buttons {
+#nomination-win .buttons {
   padding: 8px;
 }
 
@@ -89,6 +131,9 @@ body {
 /**
  * Top
  */
+.phase-top #top-message {
+  display: block;
+}
 .phase-top #users {
   display: none;
 }
@@ -96,6 +141,7 @@ body {
 /**
  * Waiting to start the roulette
  */
+.phase-waiting #global-menu,
 .phase-waiting #main-ctrl {
   display: block;
 }
@@ -111,13 +157,10 @@ body {
 .phase-stopping .user-icons .selected img {
   opacity: 1;
 }
-.phase-spinning #okBtn {
-  display: none;
-}
-.phase-spinning #focused-user-win {
+.phase-spinning #nomination-win {
   display: block;
 }
-.phase-spinning #okBtn {
+.phase-spinning #ok-btn {
   display: none;
 }
 /**
@@ -126,24 +169,24 @@ body {
 .phase-stopping #main-ctrl {
   display: none;
 }
-.phase-stopping #focused-user-win {
+.phase-stopping #nomination-win {
   display: block;
 }
-.phase-stopping #okBtn,
-.phase-stopping #stopBtn {
+.phase-stopping #ok-btn,
+.phase-stopping #stop-btn {
   display: none;
 }
 
 /**
  * Finished spinning
  */
-.phase-finished #focused-user-win {
+.phase-finished #nomination-win {
   display: block;
   background-color: #faa;
   -webkit-animation: flicker 1s linear 5;
   animation: flicker 1s linear 5;
 }
-.phase-finished #stopBtn {
+.phase-finished #stop-btn {
   display: none;
 }
 

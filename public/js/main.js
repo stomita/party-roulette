@@ -16,7 +16,7 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     initTemplates();
     initSounds();
     initMenu();
-    initDOMEventHandlers();
+    initEventHandlers();
   }
 
   function initSounds() {
@@ -35,18 +35,33 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
   }
 
   function initMenu() {
+    $('#clear-menu').click(clearMembers);
+  }
+
+  function initEventHandlers() {
+    initSocialSelectDialogEventHandlers();
+    initGroupListDialogEventHandlers();
+    initMainControlEventHandlers();
+    initNominationWindowEventHandlers();
+    initAddEntryDialogEventHandlers();
+  }
+
+  function initSocialSelectDialogEventHandlers() {
     _.forEach(socials, function(social) {
-      var li = $('<li />').append(
-        $('<a href="#" />').text(social.name)
-      ).appendTo($('#importMenu'));
+      var btn = $('<button class="btn"/>')
+        .text(social.name)
+        .css("background-image", social.icon ? "url("+social.icon+")" : null)
+        .attr('disabled', 'disabled')
+        .appendTo($('#socials'));
       social.init(function() {
         social.isLoggedIn(function(loggedIn) {});
-        li.find('a').click(function() {
+        btn.removeAttr('disabled');
+        btn.click(function() {
           if (social.getUserInfo()) {
             showGroupList(social);
           } else {
             social.authorize(function(loggedIn) {
-              if (loggedIn) { showGroupList(social); } 
+              if (loggedIn) { showGroupList(social); }
             });
           }
         });
@@ -54,34 +69,26 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     });
   }
 
-  function initDOMEventHandlers() {
+  function initGroupListDialogEventHandlers() {
     $("#groups").change(function() {
       var gid = $(this).val();
       var social = findSocial($(this).data('social-name'));
       showMemberList(social, gid);
     });
-    $('#signOutLink').click(function() {
+    $('#sign-out-link').click(function() {
       var social = findSocial($(this).data('social-name'));
-      social.logout(function() {
-        $('#groupListDialog').modal('hide');
-      });
+      social.logout(function() { $('.modal').modal('hide'); });
     });
     $('#member-list').on('click', '.user-entry', function() {
-      var checkbox = $(this).find('input[type=checkbox]');
-      if (checkbox.is(':checked')) {
-        checkbox.removeAttr('checked');
-      } else {
-        checkbox.attr('checked', 'checked');
-      }
       $(this).toggleClass('checked');
     });
-    $('#memberSelectAllLink').click(function() {
+    $('#member-select-all-link').click(function() {
       $('#member-list .user-entry').addClass('checked');
     });
-    $('#memberUnselectAllLink').click(function() {
+    $('#member-unselect-all-link').click(function() {
       $('#member-list .user-entry').removeClass('checked');
     });
-    $('#memberImportBtn').click(function() {
+    $('#member-import-btn').click(function() {
       var members = [];
       $('#member-list .user-entry.checked').each(function() {
         var el = $(this);
@@ -96,36 +103,53 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
           }
         });
       });
-      $('#groupListDialog').modal('hide');
+      $('#group-list-dialog').modal('hide');
       addMembers(members);
     });
+  }
 
+  function initMainControlEventHandlers() {
     $("#user-icons").on("click", ".user-icon", function() {
       var uid = $(this).data("userId");
       focusUser(findUser(uid));
     });
-    $("#startBtn").click(function() {
+    $("#start-btn").click(function() {
       setDisplayPhase("spinning");
       startSpinning();
     });
-    $("#shuffleBtn").click(function() {
+    $("#shuffle-btn").click(function() {
       shuffle();
       renderUsers("#user-icons", users);
     });
-    $("#deleteEntryBtn").click(deleteSelectedUser);
+    $("#delete-entry-btn").click(deleteSelectedUser);
+  }
 
-    $("#stopBtn").click(function() {
+  function initNominationWindowEventHandlers() {
+    $("#stop-btn").click(function() {
       setDisplayPhase("stopping");
       stopSpinning();
     });
-    $("#entrySaveBtn").click(function() {
-      var name = $('#inputName').val();
-      var imageUrl = $('#inputImageUrl').val();
+
+    $('#ok-btn').click(function() {
+      elected = null;
+      fanfare.pause();
+      try { fanfare.currentTime = 0; } catch(e) {}
+      setDisplayPhase("waiting");
+    });
+  }
+
+  function initAddEntryDialogEventHandlers() {
+    $("#entry-save-btn").click(function() {
+      var name = $('#entry-input-name').val();
+      var imageUrl = $('#entry-input-image-url').val();
       if (!name) { return; }
       var user = {
         id: 'user-' + (Math.random()).toString().substring(2),
         name : name,
         picture : {
+          url : imageUrl || '/image/empty.jpg'
+        },
+        thumbnail : {
           url : imageUrl || '/image/empty.jpg'
         }
       };
@@ -134,14 +158,8 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
       var entry = $(html);
       $("#user-icons").append(entry);
       fitImage(entry.find("img"), user.picture);
-      $('#addEntryDialog input').val('');
-      $('#addEntryDialog').modal('hide');
-    });
-    $('#okBtn').click(function() {
-      elected = null;
-      fanfare.pause();
-      try { fanfare.currentTime = 0; } catch(e) {}
-      setDisplayPhase("waiting");
+      $('#add-entry-dialog input').val('');
+      $('#add-entry-dialog').modal('hide');
     });
   }
 
@@ -159,13 +177,14 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
   }
 
   function showGroupList(social) {
-    $('#groupListDialog').modal('show');
+    $('.modal').modal('hide');
+    $('#group-list-dialog').modal('show');
     $('#member-list').empty();
     $('#groups').html('<option></option>')
                 .data('social-name', social.name)
                 .attr('disabled', 'disabled');
-    $('#signOutLink').data('social-name', social.name);
-    $('#memberImportBtn').attr("disabled", "disabled");
+    $('#sign-out-link').data('social-name', social.name);
+    $('#member-import-btn').attr("disabled", "disabled");
     social.getGroupList(function(groups) {
       _.forEach(groups, function(group) {
         $('#groups').append(
@@ -178,6 +197,8 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
 
   function showMemberList(social, gid) {
     $('#member-list').empty();
+    $('#member-loading-image').show();
+    $('#member-selection-ctrl').hide();
     social.getMemberList(gid, function(members) {
       _.forEach(members, function(member) {
         var html = templates.userEntryTmpl(member);
@@ -185,12 +206,21 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
         fitImage(entry.find("img"), member.thumbnail);
         $('#member-list').append(entry);
       });
-      $('#memberImportBtn').removeAttr("disabled");
+      $('#member-loading-image').hide();
+      if (members.length > 0) {
+        $('#member-selection-ctrl').show();
+      }
+      $('#member-import-btn').removeAttr("disabled");
     });
   }
 
   // array of users
   var users = [];
+
+  function clearMembers() {
+    users = [];
+    $('#user-icons').empty();
+  }
 
   function addMembers(members) {
     users = users.concat(members);
@@ -200,7 +230,10 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
       ids[user.id] = true;
       return true;
     });
+    $('#user-icons-loading-image').show();
+    setDisplayPhase("loading");
     preloadUserPhotos(users, function() {
+      $('#user-icons-loading-image').hide();
       shuffle();
       renderUsers("#user-icons", users);
       setDisplayPhase("waiting");
@@ -309,9 +342,9 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
   function focusUser(user) {
     $('#user-icons .user-icon').removeClass("selected");
     $('#user-icons #user-' + user.id).addClass("selected");
-    $('#focused-user-win .image').html('<img src="./image/s.gif" >');
-    fitImage($('#focused-user-win .image img'), user.picture);
-    $('#focused-user-win .name').text(user.name);
+    $('#nomination-win .image').html('<img src="./image/s.gif" >');
+    fitImage($('#nomination-win .image img'), user.picture);
+    $('#nomination-win .name').text(user.name);
     papapa.pause();
     try { papapa.currentTime = 0; } catch(e) {}
     papapa.play();

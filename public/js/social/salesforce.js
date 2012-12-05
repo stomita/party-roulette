@@ -143,7 +143,8 @@ define([ "config" ], function(config) {
   var userInfo = null;
 
   return {
-    name: "Salesforce",
+    name: "Chatter Group",
+    icon: "./image/chatter.png",
 
     init: function(callback) {
       loadScript("//login.salesforce.com/soap/ajax/"+version+"/connection.js", function() {

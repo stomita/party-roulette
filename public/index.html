@@ -16,7 +16,7 @@
 <script src="./lib/require.js" data-main="./js/main.js"></script>
 <script src="./lib/bootstrap/js/bootstrap.min.js"></script>
 </head>
-<body>
+<body class="phase-top">
   <!-- Underscore Templates -->
   <script type="text/x-underscore-tmpl" id="userEntryTmpl">
 <div class="user-entry checked"
@@ -38,6 +38,7 @@
 
   <div id="fb-root"></div>
 
+  <!-- navigation bar -->
   <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container">
@@ -47,47 +48,75 @@
           <span class="icon-bar"></span>
         </a>
         <a class="brand" href="#">Party Roulette</a>
-        <ul class="nav-collapse nav">
-          <li class="dropdown">
-            <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
-              Import
-              <b class="caret"></b>
-            </a>
-            <ul id="importMenu" class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-            </ul>
+        <ul id="global-menu" class="nav">
+          <li>
+            <a id="import-menu" role="button" data-toggle="modal" href="#social-select-dialog">Import</a>
           </li>
-        </ul><!--/.nav-collapse -->
+          <li>
+            <a id="clear-menu" role="button" href="#">Clear</a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 
+  <!-- main contents -->
   <div class="container">
+    <div id="top-message">
+      <div class="hero-unit clearfix">
+        <div class="image"><img src="./image/roulette-example.gif"></div>
+        <div class="text">
+          <h2>Let's Spin Party Roulette!</h2>
+          <p>Create your own roulette of friends from your social network.</p>
+          <p>
+            <a class="btn btn-primary btn-large" 
+               data-toggle="modal"
+               href="#social-select-dialog">Start Roulette</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <img id="user-icons-loading-image" src="./image/loader.gif" class="loader" />
     <div id="user-icons" class="user-icons clearfix"></div>
-    <div id="focused-user-win">
+    <div id="nomination-win">
       <div class="image"></div>
       <div class="name"></div>
       <div class="buttons">
-        <button class="btn btn-large" id="stopBtn">Stop</button>
-        <button class="btn btn-large" id="okBtn">OK</button>
+        <button class="btn btn-large" id="stop-btn">Stop</button>
+        <button class="btn btn-large" id="ok-btn">OK</button>
       </div>
     </div>
-
-    <audio id="papapa-audio" preload="auto">
-      <source src="./audio/papapa.mp3"></source>
-      <source src="./audio/papapa.ogg"></source>
-      <source src="./audio/papapa.wav"></source>
-    </audio>
-    <audio id="fanfare-audio" preload="auto">
-      <source src="./audio/fanfare.mp3"></source>
-      <source src="./audio/fanfare.ogg"></source>
-      <source src="./audio/fanfare.wav"></source>
-    </audio>
   </div>
 
+  <!-- HTML5 audios -->
+  <audio id="papapa-audio" preload="auto">
+    <source src="./audio/papapa.mp3"></source>
+    <source src="./audio/papapa.ogg"></source>
+    <source src="./audio/papapa.wav"></source>
+  </audio>
+  <audio id="fanfare-audio" preload="auto">
+    <source src="./audio/fanfare.mp3"></source>
+    <source src="./audio/fanfare.ogg"></source>
+    <source src="./audio/fanfare.wav"></source>
+  </audio>
 
  
   <!-- Group Member Selection Dialog -->
-  <div id="groupListDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div id="social-select-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Select Social Network</h3>
+    </div>
+    <div class="modal-body">
+      <div id="socials"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+  <!-- Group Member Selection Dialog -->
+  <div id="group-list-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
       <h3 id="myModalLabel">Select Members to Import</h3>
@@ -97,21 +126,22 @@
         <select id="groups"></select>
         <a href="#" id="signOutLink">Sign out from this account...</a>
       </div>
-      <div>
-        <a href="#" id="memberSelectAllLink">Select All</a>
-        <a href="#" id="memberUnselectAllLink">Unselect All</a>
+      <div id="member-selection-ctrl">
+        <a href="#" id="member-select-all-link">Select All</a>
+        <a href="#" id="member-unselect-all-link">Unselect All</a>
       </div>
+      <img id="member-loading-image" src="./image/loader.gif" class="loader" />
       <div id="member-list" class="user-list"></div>
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-      <button id="memberImportBtn" class="btn btn-primary">Import</button>
+      <button id="member-import-btn" class="btn btn-primary">Import</button>
     </div>
   </div>
 
   
   <!-- Add Member Entry Dialog -->
-  <div id="addEntryDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div id="add-entry-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
       <h3 id="myModalLabel">Add New Member</h3>
@@ -119,31 +149,31 @@
     <div class="modal-body">
       <form class="form-horizontal">
         <div class="control-group">
-          <label class="control-label" for="inputName">Name</label>
+          <label class="control-label" for="entry-input-name">Name</label>
           <div class="controls">
-            <input type="text" id="inputName" placeholder="Enter Member's Name">
+            <input type="text" id="entry-input-name" placeholder="Enter Member's Name">
           </div>
         </div>
         <div class="control-group">
-          <label class="control-label" for="inputImageUrl">Image URL</label>
+          <label class="control-label" for="entry-input-image-url">Image URL</label>
           <div class="controls">
-            <input type="text" id="inputImageUrl" placeholder="Enter Image URL (optional) ">
+            <input type="text" id="entry-input-image-url" placeholder="Enter Image URL (optional) ">
           </div>
         </div>
       </form>
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-      <button id="entrySaveBtn" class="btn btn-primary">Add</button>
+      <button id="entry-save-btn" class="btn btn-primary">Add</button>
     </div>
   </div>
 
   <div id="main-ctrl" class="buttons navbar navbar-fixed-bottom">
     <div class="navbar-inner">
-      <button class="btn btn-primary btn-large" id="startBtn">Start Roulette</button>
-      <button class="btn btn-large" id="shuffleBtn">Shuffle</button>
-      <a href="#addEntryDialog" role="button" class="btn btn-large" data-toggle="modal">Add Entry</a> 
-      <button class="btn btn-large" id="deleteEntryBtn">Delete Selected</a> 
+      <button class="btn btn-primary btn-large" id="start-btn">Start Roulette</button>
+      <button class="btn btn-large" id="shuffle-btn">Shuffle</button>
+      <a href="#add-entry-dialog" role="button" class="btn btn-large" data-toggle="modal">Add Entry</a> 
+      <button class="btn btn-large" id="delete-entry-btn">Delete Selected</a> 
     </div>
   </div>
 

@@ -7,7 +7,8 @@ define([ "config" ], function(config) {
   var userInfo = null;
 
   return {
-    name: "Facebook",
+    name: "Facebook Event",
+    icon: "./image/facebook.png",
 
     init: function(callback) {
       window.fbAsyncInit = function() {
