@@ -161,14 +161,27 @@ define([ "config" ], function(config) {
       } else {
         sforce.connection.sessionId = accessToken;
         sforce.connection.serverUrl = instanceUrl + "/services/Soap/u/"+version;
-        sforce.connection.getUserInfo({
-          onSuccess: function(res) {
-            userInfo = res;
-            callback(true);
-          },
-          onFailure: function(res) { callback(false); }
-        });
+        this.initUser(callback);
       }
+    },
+
+    initUser: function(callback) {
+      var instanceUrl = sforce.connection.serverUrl.split('/').slice(0, 3).join('/');
+      var ifr = document.createElement('iframe');
+      ifr.src = instanceUrl + '/secur/frontdoor.jsp?sid='+sforce.connection.sessionId;
+      ifr.width = ifr.height = 1;
+      ifr.style.position = 'absolute';
+      ifr.style.top = '-10000px';
+      ifr.style.left = '-10000px';
+      document.body.appendChild(ifr);
+      console.log(ifr.src);
+      sforce.connection.getUserInfo({
+        onSuccess: function(res) {
+          userInfo = res;
+          callback(true);
+        },
+        onFailure: function(res) { callback(false); }
+      });
     },
 
     getUserInfo: function() {
@@ -176,6 +189,7 @@ define([ "config" ], function(config) {
     },
 
     authorize: function(callback) {
+      var self = this;
       var url = authzUrl;
       url += "?response_type=token";
       url += "&client_id=" + config.salesforce.clientId;
@@ -203,7 +217,7 @@ define([ "config" ], function(config) {
             sforce.connection.serverUrl = params.instance_url + "/services/Soap/u/"+version;
             w.close();
             clearInterval(pid);
-            callback(true);
+            self.initUser(callback);
           }
         } catch(e) {}
       }, 100);
