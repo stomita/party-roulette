@@ -72,7 +72,7 @@ define([ "config" ], function(config) {
       var url = "me/events";
       url += "?fields=name,id";
       url += "&type=attending";
-      url += "&locale=" + userInfo.locale;
+      url += "&locale=" + (userInfo ? userInfo.locale : 'en_US');
       FB.api(url, function(response) {
         callback(response.data);
       });
@@ -81,7 +81,7 @@ define([ "config" ], function(config) {
     getMemberList: function(gid, callback) {
       var url = gid;
       url += "?fields=attending.fields(id,name,picture.width(320).height(320).type(large),gender)";
-      url += "&locale=" + userInfo.locale;
+      url += "&locale=" + (userInfo ? userInfo.locale : 'en_US');
       FB.api(url, function(response) {
         var members = _.map(response.attending.data, function(member) {
           return {

@@ -60,7 +60,11 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
           if (social.getUserInfo()) {
             showGroupList(social);
           } else {
+            $('#socials .btn').attr('disabled', 'disabled');
+            $('#social-loading-image').show();
             social.authorize(function(loggedIn) {
+              $('#socials .btn').removeAttr('disabled');
+              $('#social-loading-image').hide();
               if (loggedIn) { showGroupList(social); }
             });
           }
@@ -180,12 +184,16 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     $('.modal').modal('hide');
     $('#group-list-dialog').modal('show');
     $('#member-list').empty();
+    $('#group-loading-image').show();
+    $('#member-selection-ctrl').hide();
     $('#groups').html('<option></option>')
                 .data('social-name', social.name)
                 .attr('disabled', 'disabled');
-    $('#sign-out-link').data('social-name', social.name);
+    $('#sign-out-link').data('social-name', social.name).hide();
     $('#member-import-btn').attr("disabled", "disabled");
     social.getGroupList(function(groups) {
+      $('#group-loading-image').hide();
+      $('#sign-out-link').show();
       _.forEach(groups, function(group) {
         $('#groups').append(
           $('<option>').val(group.id).text(group.name)
