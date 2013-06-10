@@ -1,7 +1,7 @@
-/*global soundManager:true, FB:true, $:true, _:true */
+/*global soundManager, FB, $, _, location */
 
 // force https
-if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+if (location.protocol !== 'https:' && location.hostname !== 'localhost' && !/\.local$/.test(location.hostname)) {
   location.protocol = 'https:';
 }
 

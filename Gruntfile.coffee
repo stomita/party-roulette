@@ -15,7 +15,7 @@ module.exports = (grunt) ->
     copy:
       files:
         expand: true
-        cwd: "src/"
+        cwd: "src/js"
         src: "**/*.js"
         dest: "public/js"
         filter: 'isFile'
