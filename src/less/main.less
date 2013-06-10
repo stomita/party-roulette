@@ -27,14 +27,14 @@ body {
  *
  */
 #socials .btn {
-  margin: 4px;
+  margin: 5px;
   padding: 0;
-  width: 125px;
-  height: 125px;
-  line-height: 220px;
+  width: 134px;
+  height: 134px;
+  line-height: 230px;
   background-image: url(../image/empty.jpg);
   background-repeat: no-repeat;
-  background-position: center 8px;
+  background-position: center 12px;
   background-size: 90px 90px;
 }
 
@@ -48,21 +48,23 @@ body {
 /**
  *
  */
-.user-list .checked {
-  background-color: #eef;
-}
-.user-list .checked .name {
-  font-weight: bold;
-}
-.user-entry {
-  width: 100%;
-  height: 40px;
-  border-bottom: 1px dotted gray;
-  cursor: pointer;
-}
-.user-entry img {
-  width: 40px;
-  height: 40px;
+.user-list {
+  .checked {
+    background-color: #eef;
+    .name {
+      font-weight: bold;
+    }
+  }
+  .user-entry {
+    width: 100%;
+    height: 40px;
+    border-bottom: 1px dotted gray;
+    cursor: pointer;
+    img {
+      width: 40px;
+      height: 40px;
+    }
+  }
 }
 
 /**
@@ -71,24 +73,26 @@ body {
 .user-icons {
   margin: 5px auto;
   max-width: 920px;
+  .user-icon {
+    float: left;
+    border-radius: 4px;
+    margin: 1px;
+    width: 74px;
+    height: 74px;
+    border: 2px solid white;
+    cursor: pointer;
+    &.selected {
+      border: 2px solid rgba(0, 0, 255, 0.5);
+      box-shadow: 0 0 4px rgba(0, 0, 255, 0.5);
+    }
+    img {
+      width: 74px;
+      height: 74px;
+      border-radius: 4px;
+    }
+  }
 }
-.user-icon {
-  float: left;
-  border-radius: 5px;
-  margin: 2px;
-  width: 75px;
-  height: 75px;
-  border: 2px solid white;
-}
-.user-icons .selected {
-  border: 2px solid rgba(0, 0, 255, 0.5);
-  box-shadow: 0 0 4px rgba(0, 0, 255, 0.5);
-}
-.user-icon img {
-  width: 75px;
-  height: 75px;
-  border-radius: 5px;
-}
+
 #nomination-win {
   display: none;
   margin-left: -180px;
@@ -103,27 +107,38 @@ body {
   text-align: center;
   border-radius: 12px;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+  .image img {
+    margin: 20px 20px 5px;
+    width: 320px;
+    height: 320px;
+    border-radius: 6px;
+  }
+  .name {
+    height: 40px;
+    line-height: 40px;
+    font-size: 32px;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .buttons {
+    padding: 8px;
+  }
 }
-#nomination-win .image img {
-  margin: 20px 20px 5px;
-  width: 320px;
-  height: 320px;
+
+#user-detail-dialog .image {
+  margin: 15px auto;
   border-radius: 6px;
-}
-#nomination-win .name {
-  height: 40px;
-  line-height: 40px;
-  font-size: 32px;
-  font-weight: bold;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-#nomination-win .buttons {
-  padding: 8px;
+  width: 250px;
+  height: 250px;
 }
 
 #main-ctrl {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  position: fixed;
   display: none;
   text-align: center;
 }
@@ -132,6 +147,9 @@ body {
  * Top
  */
 .phase-top {
+  #menu-collapse-btn {
+    display: none;
+  }
   #top-message {
     display: block;
   }
@@ -248,6 +266,67 @@ body {
       }
     }
   }
+  #nomination-win {
+    margin-left: 0px;
+    margin-top: 0px;
+    position: absolute;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    .image img {
+      margin: 20px auto 5px auto;
+      width: 250px;
+      height: 250px;
+      border-radius: 6px;
+    }
+    .name {
+      height: 40px;
+      line-height: 40px;
+      font-size: 32px;
+      font-weight: bold;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .buttons {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding: 8px;
+    }
+  }
+  .phase-spinning, .phase-stopping, .phase-finished {
+    .user-icons {
+      display: none;
+    }
+  }
+  .modal {
+    position: relative;
+    height: auto;
+    &.fade {
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      &.in {
+        top: 0 !important;
+      }
+    }
+    #member-list {
+      margin-bottom: 50px;
+    }
+    .modal-footer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+  }
 }
 @media (min-width: 768px) and (max-width: 979px) {
   #top-message {
@@ -264,6 +343,7 @@ body {
       }
     }
   }
+
 }
 @media (min-width: 980px) {
 

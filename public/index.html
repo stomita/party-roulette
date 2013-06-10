@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>Party Roulette</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi">
 <meta name="format-detection" content="telephone=no">
@@ -12,7 +13,6 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
 <script src="./lib/soundmanager2/js/soundmanager2-jsmin.js"></script>
 <script src="./lib/underscore.js"></script>
-<script src="./lib/flXHR/flXHR.js"></script>
 <script src="./lib/require.js" data-main="./js/main.js"></script>
 <script src="./lib/bootstrap/js/bootstrap.min.js"></script>
 </head>
@@ -42,20 +42,28 @@
   <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container">
-        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <a id="menu-collapse-btn" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </a>
         <a class="brand" href="#">Party Roulette</a>
-        <ul id="global-menu" class="nav">
-          <li>
-            <a id="import-menu" role="button" data-toggle="modal" href="#social-select-dialog">Import</a>
-          </li>
-          <li>
-            <a id="clear-menu" role="button" href="#">Clear</a>
-          </li>
-        </ul>
+        <div class="nav-collapse">
+          <ul id="global-menu" class="nav">
+            <li>
+              <a id="import-menu" role="button" data-toggle="modal" href="#social-select-dialog">Import Entries</a>
+            </li>
+            <li>
+              <a id="clear-menu" role="button" href="#">Clear Entries</a>
+            </li>
+            <li>
+              <a id="shuffle-menu" role="button" href="#">Shuffle Entries</a>
+            </li>
+            <li>
+              <a id="add-menu" role="button" data-toggle="modal" href="#add-entry-dialog">Add an Entry</a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -67,7 +75,7 @@
         <div class="image"><img src="./image/roulette-example.gif"></div>
         <div class="text">
           <h2>Let's Spin Party Roulette!</h2>
-          <p>Create your own roulette of friends from your social network.</p>
+          <p>Create a roulette from your friends network.</p>
           <p>
             <a class="btn btn-primary btn-large" 
                data-toggle="modal"
@@ -105,7 +113,7 @@
   <div id="social-select-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="myModalLabel">Select Social Network</h3>
+      <h3>Select Social Network</h3>
     </div>
     <div class="modal-body">
       <div id="socials"></div>
@@ -120,13 +128,12 @@
   <div id="group-list-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="myModalLabel">Select Members to Import</h3>
+      <h3>Select Members</h3>
     </div>
     <div class="modal-body">
       <div>
         <select id="groups"></select>
         <img id="group-loading-image" src="./image/loader.gif" class="loader" />
-        <a href="#" id="sign-out-link">Sign out from this account...</a>
       </div>
       <div id="member-selection-ctrl">
         <a href="#" id="member-select-all-link">Select All</a>
@@ -136,17 +143,32 @@
       <div id="member-list" class="user-list"></div>
     </div>
     <div class="modal-footer">
+      <button id="sign-out-btn" class="btn">Sign out...</button>
       <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
       <button id="member-import-btn" class="btn btn-primary">Import</button>
     </div>
   </div>
 
-  
+  <!-- User Detail Dialog -->
+  <div id="user-detail-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3></h3>
+    </div>
+    <div class="modal-body">
+      <div class="image"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="entry-delete-btn" class="btn btn-danger">Delete</button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
   <!-- Add Member Entry Dialog -->
   <div id="add-entry-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="myModalLabel">Add New Member</h3>
+      <h3>Add New Member</h3>
     </div>
     <div class="modal-body">
       <form class="form-horizontal">
@@ -173,9 +195,6 @@
   <div id="main-ctrl" class="buttons navbar navbar-fixed-bottom">
     <div class="navbar-inner">
       <button class="btn btn-primary btn-large" id="start-btn">Start Roulette</button>
-      <button class="btn btn-large" id="shuffle-btn">Shuffle</button>
-      <a href="#add-entry-dialog" role="button" class="btn btn-large" data-toggle="modal">Add Entry</a> 
-      <button class="btn btn-large" id="delete-entry-btn">Delete Selected</a> 
     </div>
   </div>
 

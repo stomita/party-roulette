@@ -1,14 +1,28 @@
-/*global soundManager, FB, $, _, location */
+/*global requirejs, require, soundManager, FB, $, _, location */
 
 // force https
 if (location.protocol !== 'https:' && location.hostname !== 'localhost' && !/\.local$/.test(location.hostname)) {
   location.protocol = 'https:';
 }
 
+requirejs.config({
+  paths: {
+    forcetk: '/lib/forcetk'
+  },
+  shim: {
+    forcetk: {
+      exports: 'forcetk'
+    }
+  }
+});
+
 require([ "social/facebook", "social/salesforce" ], function(facebook, salesforce) {
 
   // templates
   var templates, sounds, socials = [ facebook, salesforce ];
+  var EVENT = {
+    mousedown : 'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown'
+  };
 
   init();
 
@@ -36,6 +50,10 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
 
   function initMenu() {
     $('#clear-menu').click(clearMembers);
+    $("#shuffle-menu").click(function() {
+      shuffle();
+      renderUsers("#user-icons", users);
+    });
   }
 
   function initEventHandlers() {
@@ -44,6 +62,7 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     initMainControlEventHandlers();
     initNominationWindowEventHandlers();
     initAddEntryDialogEventHandlers();
+    initUserDetailDialogEventHandlers();
   }
 
   function initSocialSelectDialogEventHandlers() {
@@ -76,10 +95,11 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
   function initGroupListDialogEventHandlers() {
     $("#groups").change(function() {
       var gid = $(this).val();
+      console.log(gid);
       var social = findSocial($(this).data('social-name'));
       showMemberList(social, gid);
     });
-    $('#sign-out-link').click(function() {
+    $('#sign-out-btn').click(function() {
       var social = findSocial($(this).data('social-name'));
       social.logout(function() { $('.modal').modal('hide'); });
     });
@@ -113,19 +133,24 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
   }
 
   function initMainControlEventHandlers() {
-    $("#user-icons").on("click", ".user-icon", function() {
-      var uid = $(this).data("userId");
-      focusUser(findUser(uid));
+    $("#user-icons").on(EVENT.mousedown, ".user-icon", function() {
+      var el = $(this);
+      var now = new Date().getTime();
+      var name = el.find('img').attr('title');
+      var uid = el.data("userId");
+      var lastClicked = el.data('lastClicked');
+      var user = findUser(uid);
+      if (el.hasClass('selected') && lastClicked + 500 > now) {
+        showUserDetailDialog(user);
+      } else {
+        focusUser(user);
+      }
+      el.data('lastClicked', now);
     });
     $("#start-btn").click(function() {
       setDisplayPhase("spinning");
       startSpinning();
     });
-    $("#shuffle-btn").click(function() {
-      shuffle();
-      renderUsers("#user-icons", users);
-    });
-    $("#delete-entry-btn").click(deleteSelectedUser);
   }
 
   function initNominationWindowEventHandlers() {
@@ -139,6 +164,13 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
       fanfare.pause();
       try { fanfare.currentTime = 0; } catch(e) {}
       setDisplayPhase("waiting");
+    });
+  }
+
+  function initUserDetailDialogEventHandlers() {
+    $("#entry-delete-btn").click(function() {
+      $('#user-detail-dialog').modal('hide');
+      deleteSelectedUser();
     });
   }
 
@@ -186,20 +218,21 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     $('#member-list').empty();
     $('#group-loading-image').show();
     $('#member-selection-ctrl').hide();
-    $('#groups').html('<option></option>')
+    $('#groups').empty()
                 .data('social-name', social.name)
                 .attr('disabled', 'disabled');
-    $('#sign-out-link').data('social-name', social.name).hide();
+    $('#sign-out-btn').data('social-name', social.name).hide();
     $('#member-import-btn').attr("disabled", "disabled");
     social.getGroupList(function(groups) {
       $('#group-loading-image').hide();
-      $('#sign-out-link').show();
+      $('#sign-out-btn').show();
       _.forEach(groups, function(group) {
         $('#groups').append(
           $('<option>').val(group.id).text(group.name)
         );
       });
       $('#groups').removeAttr('disabled');
+      $('#groups').change();
     });
   }
 
@@ -358,9 +391,15 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     papapa.play();
   }
 
+  function showUserDetailDialog(user) {
+    $('#user-detail-dialog .modal-header h3').text(user.name);
+    fitImage($('#user-detail-dialog .modal-body .image'), user.picture);
+    $('#user-detail-dialog').modal('show');
+  }
+
   function deleteSelectedUser() {
     var userIcon = $('#user-icons .selected').first();
-    if (userIcon.length>0) {
+    if (userIcon.length > 0) {
       var uid = String(userIcon.data('userId'));
       users = _.reject(users, function(attendee) {
         return attendee.id === uid;
