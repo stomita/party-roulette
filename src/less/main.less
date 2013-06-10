@@ -1,6 +1,7 @@
 body {
   padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
   padding-bottom: 60px;
+  -webkit-user-select: none;
 }
 /**
  *
@@ -170,7 +171,7 @@ body {
 /**
  * Spinning roulette
  */
-.phase-spinning, .phase-stopping {
+.phase-spinning, .phase-stop-waiting, .phase-stopping {
   .user-icon {
     img {
       opacity: 0.5;
@@ -182,7 +183,23 @@ body {
     }
   }
 }
+
 .phase-spinning {
+  #main-ctrl {
+    display: none;
+  }
+  #nomination-win {
+    display: block;
+  }
+  #ok-btn, #stop-btn {
+    display: none;
+  }
+}
+
+.phase-stop-waiting {
+  #main-ctrl {
+    display: none;
+  }
   #nomination-win {
     display: block;
   }
@@ -210,6 +227,9 @@ body {
  * Finished spinning
  */
 .phase-finished {
+  #main-ctrl {
+    display: none;
+  }
   #nomination-win {
     display: block;
     background-color: #faa;
@@ -269,15 +289,11 @@ body {
   #nomination-win {
     margin-left: 0px;
     margin-top: 0px;
-    position: absolute;
-    z-index: 9999;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: static;
     width: auto;
     height: auto;
     border-radius: 0;
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.5);
     .image img {
       margin: 20px auto 5px auto;
       width: 250px;
@@ -285,24 +301,19 @@ body {
       border-radius: 6px;
     }
     .name {
-      height: 40px;
-      line-height: 40px;
-      font-size: 32px;
+      height: 32px;
+      line-height: 32px;
+      font-size: 24px;
       font-weight: bold;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
     }
     .buttons {
-      position: absolute;
-      bottom: 0;
       width: 100%;
-      padding: 8px;
-    }
-  }
-  .phase-spinning, .phase-stopping, .phase-finished {
-    .user-icons {
-      display: none;
+      padding-top: 12px;
+      height: 42px;
+      padding-bottom: 40px;
     }
   }
   .modal {

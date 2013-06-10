@@ -24,19 +24,25 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     mousedown : 'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown'
   };
 
-  init();
+  $(init);
 
   function init() {
+    resetScroll();
     initTemplates();
     initSounds();
     initMenu();
     initEventHandlers();
   }
 
+  function resetScroll() {
+    window.scrollTo(0, 1);
+  }
+
+  var papapa, fanfare;
+
   function initSounds() {
-    sounds = {};
-    // Setup SoundManagger
-    // soundManager.setup({ url : '/lib/soundmanager2/swf/', onready : function(){} });
+    papapa = $('#papapa-audio').get(0);
+    fanfare = $('#fanfare-audio').get(0);
   }
 
   function initTemplates() {
@@ -133,7 +139,9 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
   }
 
   function initMainControlEventHandlers() {
-    $("#user-icons").on(EVENT.mousedown, ".user-icon", function() {
+    $("#user-icons").on(EVENT.mousedown, ".user-icon", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
       var el = $(this);
       var now = new Date().getTime();
       var name = el.find('img').attr('title');
@@ -150,11 +158,16 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     $("#start-btn").click(function() {
       setDisplayPhase("spinning");
       startSpinning();
+      setTimeout(function() {
+        setDisplayPhase("stop-waiting");
+      }, 1000);
     });
   }
 
   function initNominationWindowEventHandlers() {
-    $("#stop-btn").click(function() {
+    $("#stop-btn").click(function(e) {
+      e.preventDefault();
+      e.stopPropagation();
       setDisplayPhase("stopping");
       stopSpinning();
     });
@@ -278,6 +291,7 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
       shuffle();
       renderUsers("#user-icons", users);
       setDisplayPhase("waiting");
+      resetScroll();
     });
   }
 
@@ -317,8 +331,6 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
     );
   }
 
-  var papapa = $('#papapa-audio').get(0);
-  var fanfare = $('#fanfare-audio').get(0);
 
   var spinning = false;
   var stopping = false;
@@ -328,7 +340,8 @@ require([ "social/facebook", "social/salesforce" ], function(facebook, salesforc
   var SPINNING_LAST_INTERVAL = 2000;
 
   function startSpinning() {
-    window.scrollTo(0, 0);
+    resetScroll();
+    fanfare.load();
     shuffle();
     var i=0, len=users.length, nominated;
     var next = function() {
